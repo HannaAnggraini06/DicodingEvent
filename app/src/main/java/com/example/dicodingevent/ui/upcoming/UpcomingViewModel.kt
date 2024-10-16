@@ -16,11 +16,7 @@ class UpcomingViewModel : ViewModel() {
     private val _upcomingEvents = MutableLiveData<List<ListEventsItem>>()
     val upcomingEvents: LiveData<List<ListEventsItem>> = _upcomingEvents
 
-    init {
-        fetchUpcomingEvents()
-    }
-
-    private fun fetchUpcomingEvents() {
+    fun fetchUpcomingEvents() {
         viewModelScope.launch {
             try {
                 val response: Response<EventResponse> = ApiConfig.getApiService().getEvents(active = 1)

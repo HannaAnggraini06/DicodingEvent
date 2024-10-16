@@ -70,6 +70,10 @@ class DetailActivity : AppCompatActivity() {
                 binding.tvEventCity.text = event.cityName
                 binding.tvQuota.text = "Quota: ${event.quota}"
                 binding.tvRegistrants.text = "Registrants: ${event.registrants}"
+
+                val remainingQuota = event.quota - event.registrants
+                binding.tvRemainingQuota.text = "Remaining Quota: $remainingQuota"
+
                 binding.tvEventTime.text = "${event.beginTime} - ${event.endTime}"
             } ?: run {
                 Log.e("DetailActivity", "Event detail is null")
@@ -77,4 +81,5 @@ class DetailActivity : AppCompatActivity() {
             }
         })
     }
+
 }

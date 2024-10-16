@@ -2,64 +2,72 @@ package com.example.dicodingevent
 
 import android.os.Bundle
 import android.os.StrictMode
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
 import com.example.dicodingevent.databinding.ActivityMainBinding
 import com.example.dicodingevent.ui.MainViewModel
+import com.example.dicodingevent.ui.finished.FinishedFragment
+import com.example.dicodingevent.ui.home.HomeFragment
+import com.example.dicodingevent.ui.upcoming.UpcomingFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val mainViewModel: MainViewModel by viewModels()
-    private lateinit var eventAdapter: EventAdapter
+
+    // Function to load the selected fragment into the fragment container
+    private fun loadFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment)
+        transaction.commit()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Setup StrictMode untuk debugging
-        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder()
-            .detectAll()
-            .penaltyLog()
-            .build())
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup toolbar
+        val bottomNavigation: BottomNavigationView = findViewById(R.id.nav_view)
+        bottomNavigation.setOnNavigationItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.navigation_upcoming -> {
+                    loadFragment(UpcomingFragment())
+                    return@setOnNavigationItemSelectedListener true
+                }
+                R.id.navigation_finished -> {
+                    loadFragment(FinishedFragment())
+                    return@setOnNavigationItemSelectedListener true
+                }
+                R.id.navigation_home -> {
+                    loadFragment(HomeFragment())
+                    return@setOnNavigationItemSelectedListener true
+                }
+            }
+            false
+        }
+
+        if (savedInstanceState == null) {
+            loadFragment(HomeFragment())
+        }
+
+        // Setup StrictMode policy
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build()
+        )
+
         setSupportActionBar(binding.toolbar)
 
-        // Setup RecyclerView
-        eventAdapter = EventAdapter()
-        binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = eventAdapter
-        }
-
-        // Observe loading state
-        mainViewModel.isLoading.observe(this) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
-
-        // Observe error message
-        mainViewModel.errorMessage.observe(this) { errorMessage ->
-            binding.tvError.visibility = if (errorMessage != null) View.VISIBLE else View.GONE
-            binding.tvError.text = errorMessage
-        }
-
-        // Observe list of events
-        mainViewModel.listEvents.observe(this) { events ->
-            eventAdapter.submitList(events)
-            binding.tvError.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
-        }
-
-        // Setup SearchView for event search
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
-                    mainViewModel.searchEvents(it) // Gunakan ViewModel untuk mencari event berdasarkan query
+                    mainViewModel.searchEvents(it)
                 }
                 return true
             }

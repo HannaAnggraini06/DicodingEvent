@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dicodingevent.EventAdapter
@@ -21,18 +20,20 @@ class UpcomingFragment : Fragment() {
     private lateinit var upcomingViewModel: UpcomingViewModel
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentUpcomingBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         upcomingViewModel = ViewModelProvider(this).get(UpcomingViewModel::class.java)
-
         setupRecyclerView()
         observeEvents()
-
-        return binding.root
+        upcomingViewModel.fetchUpcomingEvents()
     }
 
     private fun setupRecyclerView() {
@@ -42,7 +43,7 @@ class UpcomingFragment : Fragment() {
     }
 
     private fun observeEvents() {
-        upcomingViewModel.upcomingEvents.observe(viewLifecycleOwner, Observer { events ->
+        upcomingViewModel.upcomingEvents.observe(viewLifecycleOwner, { events ->
             if (events.isNotEmpty()) {
                 eventAdapter.submitList(events)
             } else {

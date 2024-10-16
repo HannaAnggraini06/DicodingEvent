@@ -80,6 +80,13 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp" />
 
+            <!-- Sisa Kuota Event -->
+            <TextView
+                android:id="@+id/tvRemainingQuota"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp" />
+
             <!-- Waktu Event -->
             <TextView
                 android:id="@+id/tvEventTime"

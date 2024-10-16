@@ -15,15 +15,12 @@ import retrofit2.Response
 
 class MainViewModel : ViewModel() {
 
-    // LiveData untuk daftar event
     private val _listEvents = MutableLiveData<List<ListEventsItem>>()
     val listEvents: LiveData<List<ListEventsItem>> = _listEvents
 
-    // LiveData untuk status loading
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // LiveData untuk pesan error
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
@@ -31,12 +28,10 @@ class MainViewModel : ViewModel() {
         private const val TAG = "MainViewModel"
     }
 
-    // Fungsi inisialisasi memanggil event default (active = 0)
     init {
         findEvents()
     }
 
-    // Fungsi untuk mencari event berdasarkan status aktif (active)
     fun findEvents(active: Int = 0) {
         _isLoading.value = true
         _errorMessage.value = null
@@ -67,7 +62,6 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    // Fungsi untuk pencarian event menggunakan query
     fun searchEvents(query: String) {
         _isLoading.value = true
         _errorMessage.value = null
@@ -77,7 +71,6 @@ class MainViewModel : ViewModel() {
                 withContext(Dispatchers.Main) {
                     _isLoading.value = false
                     if (response.isSuccessful && response.body() != null) {
-                        // Ambil langsung listEvents dari response body
                         _listEvents.value = response.body()?.listEvents ?: listOf()
 
                         if (_listEvents.value.isNullOrEmpty()) {
