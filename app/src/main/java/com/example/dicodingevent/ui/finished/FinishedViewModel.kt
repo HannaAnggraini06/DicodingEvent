@@ -16,11 +16,14 @@ class FinishedViewModel : ViewModel() {
     private val _finishedEvents = MutableLiveData<List<ListEventsItem>>()
     val finishedEvents: LiveData<List<ListEventsItem>> = _finishedEvents
 
+    private var _isLoading = MutableLiveData<Boolean>()
+    val isLoading get() = _isLoading
+
     init {
         fetchFinishedEvents()
     }
 
-    private fun fetchFinishedEvents() {
+    fun fetchFinishedEvents() {
         viewModelScope.launch {
             try {
                 val response: Response<EventResponse> = ApiConfig.getApiService().getEvents(active = 0)
@@ -33,6 +36,20 @@ class FinishedViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("FinishedViewModel", "Exception during fetch: ${e.message}")
                 _finishedEvents.value = listOf() // Clear list on failure
+            }
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    val response: Response<EventResponse> =
+                        ApiConfig.getApiService().getEvents(active = 1)
+                    if (response.isSuccessful && response.body() != null) {
+                        _isLoading.value = false
+                    } else {
+                        _isLoading.value = false
+                    }
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                }
             }
         }
     }

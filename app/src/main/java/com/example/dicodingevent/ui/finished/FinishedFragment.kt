@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dicodingevent.EventAdapter
@@ -35,6 +34,31 @@ class FinishedFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupLoading()
+
+        finishedViewModel = ViewModelProvider(this).get(FinishedViewModel::class.java)
+        setupRecyclerView()
+        observeEvents()
+        finishedViewModel.fetchFinishedEvents()
+    }
+
+    private fun setupLoading() {
+        finishedViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.apply {
+                if (isLoading) {
+                    pbLoading.visibility = View.VISIBLE
+                    rvFinishedEvents.visibility = View.GONE
+                } else {
+                    pbLoading.visibility = View.GONE
+                    rvFinishedEvents.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         binding.rvFinishedEvents.layoutManager = LinearLayoutManager(requireContext())
         eventAdapter = EventAdapter()
@@ -42,13 +66,14 @@ class FinishedFragment : Fragment() {
     }
 
     private fun observeEvents() {
-        finishedViewModel.finishedEvents.observe(viewLifecycleOwner, Observer { events ->
+        finishedViewModel.finishedEvents.observe(viewLifecycleOwner) { events ->
             if (events.isNotEmpty()) {
                 eventAdapter.submitList(events)
             } else {
-                Toast.makeText(requireContext(), "No finished events available", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "No finished events available", Toast.LENGTH_SHORT)
+                    .show()
             }
-        })
+        }
     }
 
     override fun onDestroyView() {

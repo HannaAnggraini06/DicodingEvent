@@ -16,6 +16,9 @@ class UpcomingViewModel : ViewModel() {
     private val _upcomingEvents = MutableLiveData<List<ListEventsItem>>()
     val upcomingEvents: LiveData<List<ListEventsItem>> = _upcomingEvents
 
+    private var _isLoading = MutableLiveData<Boolean>()
+    val isLoading get() = _isLoading
+
     fun fetchUpcomingEvents() {
         viewModelScope.launch {
             try {
@@ -29,6 +32,20 @@ class UpcomingViewModel : ViewModel() {
             } catch (e: Exception) {
                 Log.e("UpcomingViewModel", "Exception during fetch: ${e.message}")
                 _upcomingEvents.value = listOf() // Clear list on failure
+            }
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    val response: Response<EventResponse> =
+                        ApiConfig.getApiService().getEvents(active = 1)
+                    if (response.isSuccessful && response.body() != null) {
+                        _isLoading.value = false
+                    } else {
+                        _isLoading.value = false
+                    }
+                } catch (e: Exception) {
+                    _isLoading.value = false
+                }
             }
         }
     }
